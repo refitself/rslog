@@ -1,0 +1,2 @@
+# rslog
+log by rs
