@@ -1,4 +1,4 @@
-module rslog
+module github.com/refitself/rslog
 
 go 1.14
 
