@@ -39,11 +39,11 @@ type zapLog struct {
 	sugarLog *zap.SugaredLogger
 }
 
-func GetZapLog() *zap.Logger {
-	if zlog, ok := v_logger.(*zapLog); ok {
-		return zlog.Logger
+func ResetZapLog(l *zap.Logger) {
+	if _, ok := v_logger.(*zapLog); ok {
+		v_logger.(*zapLog).Logger = l
+		v_logger.(*zapLog).sugarLog = l.Sugar()
 	}
-	return nil
 }
 
 func newZapLog() *zapLog {
