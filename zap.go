@@ -1,9 +1,11 @@
 package rslog
 
 import (
+	"io"
 	"os"
 	"time"
 
+	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -16,12 +18,12 @@ func ZapTimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 func ZapNewEncoderConfig() zapcore.EncoderConfig {
 	return zapcore.EncoderConfig{
 		// Keys can be anything except the empty string.
-		TimeKey:        "T",                           // json时时间键
-		LevelKey:       "L",                           // json时日志等级键
-		NameKey:        "N",                           // json时日志记录器键
-		CallerKey:      "C",                           // json时日志文件信息键
-		MessageKey:     "M",                           // json时日志消息键
-		StacktraceKey:  "S",                           // json时堆栈键
+		TimeKey:        "time",                        // json时时间键
+		LevelKey:       "level",                       // json时日志等级键
+		NameKey:        "name",                        // json时日志记录器键
+		CallerKey:      "call",                        // json时日志文件信息键
+		MessageKey:     "msg",                         // json时日志消息键
+		StacktraceKey:  "stack",                       // json时堆栈键
 		LineEnding:     zapcore.DefaultLineEnding,     // 友好日志换行符
 		EncodeLevel:    zapcore.CapitalLevelEncoder,   // 友好日志等级名大小写（info INFO）
 		EncodeTime:     ZapTimeEncoder,                // 友好日志时日期格式化
@@ -125,4 +127,18 @@ func GetZapLevel(l string) zapcore.Level {
 		return zapcore.DPanicLevel
 	}
 	return zapcore.InfoLevel
+}
+
+func GetWriter(filename string, maxDay int) io.Writer {
+	hook, err := rotatelogs.New(
+		filename+".%Y%m%d", // 没有使用go风格反人类的format格式
+		rotatelogs.WithLinkName(filename),
+		rotatelogs.WithMaxAge(time.Hour*24*time.Duration(maxDay)),
+		// rotatelogs.WithRotationTime(time.Hour),
+	)
+
+	if err != nil {
+		panic(err)
+	}
+	return hook
 }
