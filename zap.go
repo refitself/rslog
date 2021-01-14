@@ -96,9 +96,33 @@ func (p *zapLog) Errorf(format string, datas ...interface{}) {
 }
 
 func (p *zapLog) SetLevel(l string) {
-	var tempL zapcore.Level
-	if err := tempL.Set(l); err == nil {
-		p.Logger = initZapLog(tempL)
-		p.sugarLog = p.Logger.Sugar()
+	p.Logger = initZapLog(GetZapLevel(l))
+	p.sugarLog = p.Logger.Sugar()
+}
+
+// "debug": zapcore.DebugLevel,
+// "info": zapcore.InfoLevel,
+// "warn": zapcore.WarnLevel,
+// "error": zapcore.ErrorLevel,
+// "dpanic": zapcore.DPanicLevel,
+// "panic": zapcore.PanicLevel,
+// "fatal": zapcore.FatalLevel,
+func GetZapLevel(l string) zapcore.Level {
+	switch l {
+	case "info":
+		return zapcore.InfoLevel
+	case "debug":
+		return zapcore.DebugLevel
+	case "warn":
+		return zapcore.WarnLevel
+	case "error":
+		return zapcore.ErrorLevel
+	case "panic":
+		return zapcore.PanicLevel
+	case "fatal":
+		return zapcore.FatalLevel
+	case "dpanic":
+		return zapcore.DPanicLevel
 	}
+	return zapcore.InfoLevel
 }
