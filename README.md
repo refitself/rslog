@@ -11,6 +11,16 @@ import (
 
 func main() {
     // rslog.UseLog(rslog.C_Log_Zap)
+    
+    //// reset zap logger
+    // fileWriter := rslog.GetWriter(logFile, 30)
+    // core := zapcore.NewCore(
+    //     zapcore.NewJSONEncoder(rslog.ZapNewEncoderConfig()),
+    //     // zapcore.NewConsoleEncoder(rslog.ZapNewEncoderConfig()),
+    //     zapcore.NewMultiWriteSyncer(os.Stdout, zapcore.AddSync(fileWriter)),
+    //     zap.NewAtomicLevelAt(zapcore.InfoLevel),
+    // )
+    // rslog.ResetZapLog(zap.New(core, zap.AddCaller()))
 
     rslog.Info("test Info")
     rslog.Infof("test Infof: %s", "hello log")
