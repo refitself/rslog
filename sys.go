@@ -3,18 +3,22 @@ package rslog
 import (
     "fmt"
     "log"
+    "os"
 )
 
 type sysLog struct {
     Module string
 
     level string
+
+    logger *log.Logger
 }
 
 func newSysLog(module string) *sysLog {
     return &sysLog{
         Module: module,
         level:  "info",
+        logger: log.New(os.Stdout, "", log.LstdFlags),
     }
 }
 
@@ -35,32 +39,37 @@ func (p *sysLog) printf(level string, fprintf func(string, ...interface{}), form
 }
 
 func (p *sysLog) Info(datas ...interface{}) {
-    p.print("info", log.Printf, datas...)
+    p.print("info", p.logger.Printf, datas...)
 }
 func (p *sysLog) Infof(format string, datas ...interface{}) {
-    p.printf("info", log.Printf, format, datas...)
+    p.printf("info", p.logger.Printf, format, datas...)
 }
 
 func (p *sysLog) Debug(datas ...interface{}) {
-    p.print("debug", log.Printf, datas...)
+    p.print("debug", p.logger.Printf, datas...)
 }
 func (p *sysLog) Debugf(format string, datas ...interface{}) {
-    p.printf("debug", log.Printf, format, datas...)
+    p.printf("debug", p.logger.Printf, format, datas...)
 }
 
 func (p *sysLog) Warn(datas ...interface{}) {
-    p.print("warn", log.Printf, datas...)
+    p.print("warn", p.logger.Printf, datas...)
 }
 func (p *sysLog) Warnf(format string, datas ...interface{}) {
-    p.printf("warn", log.Printf, format, datas...)
+    p.printf("warn", p.logger.Printf, format, datas...)
 }
 func (p *sysLog) Error(datas ...interface{}) {
-    p.print("error", log.Printf, datas...)
+    p.print("error", p.logger.Printf, datas...)
 }
 func (p *sysLog) Errorf(format string, datas ...interface{}) {
-    p.printf("error", log.Printf, format, datas...)
+    p.printf("error", p.logger.Printf, format, datas...)
 }
 
 func (p *sysLog) SetLevel(l string) {
     p.level = l
+}
+func (p *sysLog) ResetLog(l interface{}) {
+    if logger, ok := l.(*log.Logger); ok {
+        p.logger = logger
+    }
 }

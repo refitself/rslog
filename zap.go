@@ -10,47 +10,18 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// 格式化时间
-func ZapTimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
-	enc.AppendString(t.Format("2006-01-02 15:04:05.000"))
-}
-
-func ZapNewEncoderConfig() zapcore.EncoderConfig {
-	return zapcore.EncoderConfig{
-		// Keys can be anything except the empty string.
-		TimeKey:        "time",                        // json时时间键
-		LevelKey:       "level",                       // json时日志等级键
-		NameKey:        "name",                        // json时日志记录器键
-		CallerKey:      "call",                        // json时日志文件信息键
-		MessageKey:     "msg",                         // json时日志消息键
-		StacktraceKey:  "stack",                       // json时堆栈键
-		LineEnding:     zapcore.DefaultLineEnding,     // 友好日志换行符
-		EncodeLevel:    zapcore.CapitalLevelEncoder,   // 友好日志等级名大小写（info INFO）
-		EncodeTime:     ZapTimeEncoder,                // 友好日志时日期格式化
-		EncodeDuration: zapcore.StringDurationEncoder, // 时间序列化
-		EncodeCaller:   zapcore.ShortCallerEncoder,    // 日志文件信息（包/文件.go:行号）
-	}
-}
-
 type zapLog struct {
-	Logger *zap.Logger
+	logger *zap.Logger
 
 	level    string
 	sugarLog *zap.SugaredLogger
 }
 
-func ResetZapLog(l *zap.Logger) {
-	if _, ok := v_logger.(*zapLog); ok {
-		v_logger.(*zapLog).Logger = l
-		v_logger.(*zapLog).sugarLog = l.Sugar()
-	}
-}
-
 func newZapLog() *zapLog {
 	p := &zapLog{}
 
-	p.Logger = initZapLog(zapcore.InfoLevel)
-	p.sugarLog = p.Logger.Sugar()
+	p.logger = initZapLog(zapcore.InfoLevel)
+	p.sugarLog = p.logger.Sugar()
 
 	return p
 }
@@ -98,8 +69,14 @@ func (p *zapLog) Errorf(format string, datas ...interface{}) {
 }
 
 func (p *zapLog) SetLevel(l string) {
-	p.Logger = initZapLog(GetZapLevel(l))
-	p.sugarLog = p.Logger.Sugar()
+	p.logger = initZapLog(GetZapLevel(l))
+	p.sugarLog = p.logger.Sugar()
+}
+func (p *zapLog) ResetLog(l interface{}) {
+	if logger, ok := l.(*zap.Logger); ok {
+		p.logger = logger
+		p.sugarLog = p.logger.Sugar()
+	}
 }
 
 // "debug": zapcore.DebugLevel,
@@ -129,7 +106,7 @@ func GetZapLevel(l string) zapcore.Level {
 	return zapcore.InfoLevel
 }
 
-func GetWriter(filename string, maxDay int) io.Writer {
+func GetZapWriter(filename string, maxDay int) io.Writer {
 	hook, err := rotatelogs.New(
 		filename+".%Y%m%d", // 没有使用go风格反人类的format格式
 		rotatelogs.WithLinkName(filename),
@@ -141,4 +118,26 @@ func GetWriter(filename string, maxDay int) io.Writer {
 		panic(err)
 	}
 	return hook
+}
+
+// 格式化时间
+func ZapTimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+	enc.AppendString(t.Format("2006-01-02 15:04:05.000"))
+}
+
+func ZapNewEncoderConfig() zapcore.EncoderConfig {
+	return zapcore.EncoderConfig{
+		// Keys can be anything except the empty string.
+		TimeKey:        "time",                        // json时时间键
+		LevelKey:       "level",                       // json时日志等级键
+		NameKey:        "name",                        // json时日志记录器键
+		CallerKey:      "call",                        // json时日志文件信息键
+		MessageKey:     "msg",                         // json时日志消息键
+		StacktraceKey:  "stack",                       // json时堆栈键
+		LineEnding:     zapcore.DefaultLineEnding,     // 友好日志换行符
+		EncodeLevel:    zapcore.CapitalLevelEncoder,   // 友好日志等级名大小写（info INFO）
+		EncodeTime:     ZapTimeEncoder,                // 友好日志时日期格式化
+		EncodeDuration: zapcore.StringDurationEncoder, // 时间序列化
+		EncodeCaller:   zapcore.ShortCallerEncoder,    // 日志文件信息（包/文件.go:行号）
+	}
 }

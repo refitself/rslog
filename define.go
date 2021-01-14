@@ -48,6 +48,7 @@ type i_log interface {
 	Errorf(format string, datas ...interface{})
 
 	SetLevel(l string)
+	ResetLog(l interface{})
 }
 
 func stackTrace(depth int) string {

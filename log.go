@@ -44,6 +44,10 @@ func SetLevel(l string) {
 	v_logger.SetLevel(l)
 }
 
+func ResetLog(l interface{}) {
+	v_logger.ResetLog(l)
+}
+
 func init() {
 	UseLog(C_Log_Sys)
 }
